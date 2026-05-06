@@ -26,12 +26,9 @@ jobs:
             archive \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Export IPA (unsigned workaround)
+      - name: Create ExportOptions.plist
         run: |
-          xcodebuild -exportArchive \
-            -archivePath build/App.xcarchive \
-            -exportPath build/export \
-            -exportOptionsPlist <(cat <<EOF
+          cat > ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -47,7 +44,13 @@ jobs:
           </dict>
           </plist>
           EOF
-          )
+
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportPath build/export \
+            -exportOptionsPlist ExportOptions.plist
 
       - name: Find IPA
         run: find build/export -type f
